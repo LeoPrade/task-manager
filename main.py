@@ -42,8 +42,6 @@ def main():
             list_undone_tasks()
         else: 
             print("Invalid input for list command. Use 'done', 'in-progress', 'todo' or leave empty for all tasks.")
-    else:
-        pass
 
 
 class Task:
@@ -62,6 +60,12 @@ def print_task(task: dict) -> None:
     print(f"{task['description']} (ID: {task['id']}, Status: {task['status']})")
 
 def add_task() -> None:
+    """
+    Add a new task to the tasks list.
+    
+    Syntax: add <task description>
+    """
+
     if len(sys.argv) < 3:
         print("Please provide a task description.")
         return
@@ -80,6 +84,12 @@ def add_task() -> None:
     load_tasks()
 
 def update_task(update_id: int) -> None:
+    """
+    Update a existing task in the tasks list.
+    
+    Syntax: update <task id> <task description>
+    """
+
     if len(sys.argv) < 4:
         print("Please provide a task description.")
         return
@@ -98,6 +108,12 @@ def update_task(update_id: int) -> None:
     load_tasks()
 
 def delete_task(delete_id: int) -> None:
+    """
+    Remove a existing task from the tasks list.
+    
+    Syntax: delete <task id>
+    """
+
     if len(sys.argv) < 3:
         print("Please provide a task ID.")
         return
@@ -106,6 +122,12 @@ def delete_task(delete_id: int) -> None:
     load_tasks()
 
 def mark_in_progress(progress_id: int) -> None:
+    """
+    Mark the status of a task as "in-progress".
+    
+    Syntax: mark in-progress <task id>
+    """
+    
     if len(sys.argv) < 4:
         print("Please provide a task ID.")
         return
@@ -120,6 +142,12 @@ def mark_in_progress(progress_id: int) -> None:
     load_tasks()
 
 def mark_done(done_id: int) -> None:
+    """
+    Mark the status of a task as "done".
+    
+    Syntax: mark done <task id>
+    """
+
     if len(sys.argv) < 4:
         print("Please provide a task ID.")
         return
