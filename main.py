@@ -2,18 +2,20 @@ import json
 import sys
 from pathlib import Path
 import datetime
+from typing import Any
 
-p = Path("tasks.json") 
+FILE_NAME = "tasks.json"
+p = Path(FILE_NAME) 
 
-tasks: list = []
+tasks: list[dict[str, Any]] = []
 
 def main():
     if len(sys.argv) < 2:
-        print("Bitte einen Befehl eingeben!")
+        print("Please provide a command: add, update, delete, mark, list")
         return
 
     if p.exists():
-        with open("tasks.json", "r") as f:
+        with open(FILE_NAME, "r") as f:
             tasks.extend(json.load(f))
 
     if sys.argv[1] == "add":
@@ -45,32 +47,45 @@ def main():
 
 
 class Task:
-    def __init__(self, id, description, created_at, updated_at):
+    def __init__(self, id: int, description: str, created_at: str, updated_at: str):
         self.id = id
         self.description = description
         self.created_at = created_at
         self.updated_at = updated_at
         self.status = "todo"
 
-def add_task():
-    eingabe = " ".join(sys.argv[2:])
-    
-    if len(tasks) == 0:
-        new_id = 1
-    else:
-        new_id = max(task["id"] for task in tasks) + 1
-    created_at = str(datetime.datetime.now())
-    updated_at = str(datetime.datetime.now())
-    new_task = Task(new_id, eingabe, created_at, updated_at)
-
-    tasks.append(new_task.__dict__)
-    with open("tasks.json", "w") as f:
+def load_tasks() -> None:
+    with open(FILE_NAME, "w") as f:
         json.dump(tasks, f, indent=4)
 
-def update_task(update_id):
-    update = " ".join(sys.argv[3:])
+def print_task(task: dict) -> None:
+    print(f"{task['description']} (ID: {task['id']}, Status: {task['status']})")
+
+def add_task() -> None:
+    if len(sys.argv) < 3:
+        print("Please provide a task description.")
+        return
+    eingabe: str = " ".join(sys.argv[2:])
     
-    task_index = None
+    if len(tasks) == 0:
+        new_id: int = 1
+    else:
+        new_id: int = max(task["id"] for task in tasks) + 1
+    created_at: str = str(datetime.datetime.now())
+    updated_at: str = str(datetime.datetime.now())
+    new_task: Task = Task(new_id, eingabe, created_at, updated_at)
+
+    tasks.append(new_task.__dict__)
+    print(f"Task added succesfully. (ID: {new_id})")
+    load_tasks()
+
+def update_task(update_id: int) -> None:
+    if len(sys.argv) < 4:
+        print("Please provide a task description.")
+        return
+    update: str = " ".join(sys.argv[3:])
+    
+    task_index: int | None = None
     for i, task in enumerate(tasks):
         if task["id"] == update_id:
             task_index = i
@@ -78,19 +93,23 @@ def update_task(update_id):
         print("Task was not found.")
         return 
 
-    updated_task = Task(update_id, update, tasks[task_index]["created_at"], str(datetime.datetime.now()))
+    updated_task: Task = Task(update_id, update, tasks[task_index]["created_at"], str(datetime.datetime.now()))
     tasks[task_index] = updated_task.__dict__
-    with open("tasks.json", "w") as f:
-        json.dump(tasks, f, indent=4)
+    load_tasks()
 
-def delete_task(delete_id):
+def delete_task(delete_id: int) -> None:
+    if len(sys.argv) < 3:
+        print("Please provide a task ID.")
+        return
     global tasks
     tasks = [task for task in tasks if task["id"] != delete_id]
-    with open("tasks.json", "w") as f:
-        json.dump(tasks, f, indent=4)
+    load_tasks()
 
-def mark_in_progress(progress_id):
-    task_index = None
+def mark_in_progress(progress_id: int) -> None:
+    if len(sys.argv) < 4:
+        print("Please provide a task ID.")
+        return
+    task_index: int | None = None
     for i, task in enumerate(tasks):
         if task["id"] == progress_id:
             task_index = i
@@ -98,11 +117,13 @@ def mark_in_progress(progress_id):
     if task_index is None:
         print("Task was not found.")
         return 
-    with open("tasks.json", "w") as f:
-        json.dump(tasks, f, indent=4)
+    load_tasks()
 
-def mark_done(done_id):
-    task_index = None
+def mark_done(done_id: int) -> None:
+    if len(sys.argv) < 4:
+        print("Please provide a task ID.")
+        return
+    task_index: int | None = None
     for i, task in enumerate(tasks):
         if task["id"] == done_id:
             task_index = i
@@ -110,27 +131,26 @@ def mark_done(done_id):
     if task_index is None:
         print("Task was not found.")
         return 
-    with open("tasks.json", "w") as f:
-        json.dump(tasks, f, indent=4)
+    load_tasks()
 
-def list_all_tasks():
+def list_all_tasks() -> None:
     for task in tasks:
-        print(task["description"])
+        print_task(task)
 
-def list_completed_tasks():
+def list_completed_tasks() -> None:
     for task in tasks:
         if task["status"] == "done":
-            print(task["description"])
+            print_task(task)
 
-def list_pending_tasks():
+def list_pending_tasks() -> None:
     for task in tasks:
         if task["status"] == "in-progress":
-            print(task["description"])
+            print_task(task)
 
-def list_undone_tasks():
+def list_undone_tasks() -> None:
     for task in tasks:
         if task["status"] == "todo":
-            print(task["description"])
+            print_task(task)
 
 
 if __name__ == "__main__":
